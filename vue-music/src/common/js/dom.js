@@ -3,10 +3,8 @@ export function addClass(el, className) {
         return;
     }
     let newClass = el.className.split(' ');
-    console.log('newClass',newClass);
     newClass.push(className);
-    el.className = className.join(' ');
-    console.log('el.className',el.className);
+    el.className = newClass.join(' ');
 }
 export function hasClass(el, className) {
     let reg = new RegExp('(^|\\s)' + className + '(\\s|$)');
