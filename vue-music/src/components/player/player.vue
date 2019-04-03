@@ -105,21 +105,23 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapMutations } from "vuex";
+import { mapGetters, mapMutations, mapActions } from "vuex";
 import animations from "create-keyframe-animation";
 import { prefixStyle } from "common/js/dom";
 import ProgressBar from "base/progress-bar/progress-bar";
 import ProgressCircle from "base/progress-circle/progress-circle";
-import { playMode } from "common/js/config";
 import { shuffle } from "common/js/util";
+import { playMode } from "common/js/config";
 import Lyric from "lyric-parser";
 import Scroll from "base/scroll/scroll";
 import Playlist from "components/playlist/playlist";
+import { playerMixin } from "common/js/mixin";
 
 const transform = prefixStyle("transform");
 const transitionDuration = prefixStyle("transitionDuration");
 
 export default {
+  mixins: [playerMixin],
   data() {
     return {
       songReady: false,
@@ -138,11 +140,11 @@ export default {
     playIcon() {
       return this.playing ? "icon-pause" : "icon-play";
     },
-    iconMode() {
-      return this.mode === playMode.sequence
-        ? "icon-sequence"
-        : this.mode === playMode.loop ? "icon-loop" : "icon-random";
-    },
+    // iconMode() {
+    //   return this.mode === playMode.sequence
+    //     ? "icon-sequence"
+    //     : this.mode === playMode.loop ? "icon-loop" : "icon-random";
+    // },
     miniIcon() {
       return this.playing ? "icon-pause-mini" : "icon-play-mini";
     },
@@ -152,15 +154,7 @@ export default {
     percent() {
       return this.currentTime / this.currentSong.duration;
     },
-    ...mapGetters([
-      "fullScreen",
-      "playlist",
-      "currentSong",
-      "playing",
-      "currentIndex",
-      "mode",
-      "sequenceList"
-    ])
+    ...mapGetters(["fullScreen", "playing", "currentIndex"])
   },
   created() {
     this.touch = {};
@@ -273,6 +267,7 @@ export default {
     },
     ready() {
       this.songReady = true;
+      this.savePlayHistory(this.currentSong);
     },
     error() {
       this.songReady = true;
@@ -425,17 +420,20 @@ export default {
       };
     },
     ...mapMutations({
-      setFullScreen: "SET_FULL_SCREEN",
-      setPlayingState: "SET_PLAYING_STATE",
-      setCurrentIndex: "SET_CURRENT_INDEX",
-      setPlayMode: "SET_PLAY_MODE",
-      setPlayList: "SET_PLAYLIST"
-    })
+      setFullScreen: "SET_FULL_SCREEN"
+      // setPlayingState: "SET_PLAYING_STATE",
+      // setCurrentIndex: "SET_CURRENT_INDEX",
+      // setPlayMode: "SET_PLAY_MODE",
+      // setPlayList: "SET_PLAYLIST"
+    }),
+    ...mapActions([
+      'savePlayHistory'
+    ])
   },
   watch: {
     currentSong(newSong, oldSong) {
-      if(!newSong.id){
-        return
+      if (!newSong.id) {
+        return;
       }
       if (newSong.id === oldSong.id) {
         return;
