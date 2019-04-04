@@ -14,12 +14,12 @@
       <div class="shortcut" v-show="!query">
         <switches :switches="switches" :currentIndex="currentIndex" @switch="switchItem"></switches>
         <div class="list-wrapper">
-          <scroll class="list-scroll" v-if="currentIndex === 0" :data="playHistory">
+          <scroll ref="songList" class="list-scroll" v-if="currentIndex === 0" :data="playHistory">
             <div class="list-inner">
               <song-list :songs="playHistory" @select="selectSong"></song-list>
             </div>
           </scroll>
-          <scroll class="list-scroll" v-if="currentIndex === 1" :data="searchHistory">
+          <scroll ref="searchList" :refreshDelay="refreshDelay" class="list-scroll" v-if="currentIndex === 1" :data="searchHistory">
             <div class="list-inner">
               <search-list @delete="deleteSearchHistory" @select="addQuery" :searches="searchHistory"></search-list>
             </div>
@@ -29,6 +29,12 @@
       <div class="search-result" v-show="query">
         <suggest :query="query" :showSinger="showSinger" @select="selectSuggest" @listScroll="blurInput"></suggest> 
       </div>
+      <top-tip ref="topTip">
+        <div class="tip-title">
+          <i class="icon-ok"></i>
+          <span class="text">1首歌曲已经添加到播放队列</span>
+        </div>
+      </top-tip>
     </div>
   </transition>
 </template>
@@ -41,6 +47,7 @@ import Scroll from "base/scroll/scroll";
 import { mapGetters, mapActions } from "vuex";
 import SongList from "base/song-list/song-list";
 import SearchList from "base/search-list/search-list";
+import TopTip from "base/top-tip/top-tip";
 import Song from "common/js/song";
 export default {
   mixins: [searchMixin],
@@ -65,6 +72,13 @@ export default {
   methods: {
     show() {
       this.showFlag = true;
+      setTimeout(() => {
+        if (this.currentIndex === 0) {
+          this.$refs.songList.refresh();
+        } else {
+          this.$refs.searchList.refresh();
+        }
+      });
     },
     hide() {
       this.showFlag = false;
@@ -78,7 +92,11 @@ export default {
     selectSong(song, index) {
       if (index !== 0) {
         this.insertSong(new Song(song));
+        this.showTip();
       }
+    },
+    showTip() {
+      this.$refs.topTip.show();
     },
     ...mapActions(["insertSong"])
   },
@@ -88,7 +106,8 @@ export default {
     Switches,
     Scroll,
     SongList,
-    SearchList
+    SearchList,
+    TopTip
   }
 };
 </script>
