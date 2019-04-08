@@ -23,6 +23,9 @@
             </div>
         </scroll>
       </div>
+      <div class="no-result-wrapper" v-show="noResult">
+        <no-result :title="noResultDesc"></no-result>
+      </div>
     </div>
   </transition>
 </template>
@@ -31,6 +34,7 @@ import Switches from "base/switches/switches";
 import Scroll from "base/scroll/scroll";
 import SongList from "base/song-list/song-list";
 import Song from "common/js/song";
+import NoResult from "base/no-result/no-result";
 import { mapGetters, mapActions } from "vuex";
 import { playlistMixin } from "common/js/mixin";
 export default {
@@ -42,6 +46,20 @@ export default {
     };
   },
   computed: {
+    noResult() {
+      if (this.currentIndex === 0) {
+        return !this.favoriteList.length;
+      } else {
+        return !this.playHistory.length;
+      }
+    },
+    noResultDesc() {
+      if (this.currentIndex === 0) {
+        return "暂无收藏歌曲";
+      } else {
+        return "你还没有听歌歌曲";
+      }
+    },
     ...mapGetters(["favoriteList", "playHistory"])
   },
   methods: {
@@ -77,7 +95,8 @@ export default {
   components: {
     Switches,
     Scroll,
-    SongList
+    SongList,
+    NoResult
   }
 };
 </script>
